@@ -1,0 +1,29 @@
+PODS:
+  - Alamofire (4.9.1)
+  - Flutter (1.0.0)
+  - MexAppSwiftHttpWrapper (0.0.1):
+    - Alamofire
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - MexAppSwiftHttpWrapper (from `.symlinks/plugins/MexAppSwiftHttpWrapper/ios`)
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  MexAppSwiftHttpWrapper:
+    :path: ".symlinks/plugins/MexAppSwiftHttpWrapper/ios"
+
+SPEC CHECKSUMS:
+  Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  MexAppSwiftHttpWrapper: 80592fd4c1f28363f7355ab6263429a966a58582
+
+PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+
+COCOAPODS: 1.9.3
