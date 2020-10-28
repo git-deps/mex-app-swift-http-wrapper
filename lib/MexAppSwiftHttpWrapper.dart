@@ -13,12 +13,10 @@ class MexAppSwiftHttpWrapper {
   }
 
   static Future<Object> request(NetworkRequest request) async {
-    print('request - ' + jsonEncode(request.toJson()));
     final Object response = await _channel.invokeMethod(
       'request',
       jsonEncode(request),
     );
-    print('response - ' + response.toString());
 
     if (response is Map<String, dynamic> &&
         response['swiftHttpError'] != null) {
