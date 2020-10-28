@@ -20,7 +20,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    //initPlatformState();
     _getMarkets();
   }
 
@@ -45,8 +45,12 @@ class _MyAppState extends State<MyApp> {
   }
 
   _getMarkets() async {
-    final markets = await MexAppSwiftHttpWrapper.get(
-        "https://api.int.duedex.com/v1/instrument");
+    final markets = await MexAppSwiftHttpWrapper.request(
+      NetworkRequest()
+        ..apiHost = 'https://api.int.duedex.com'
+        ..endpoint = 'v1/instrument/BTCUSD'
+        ..method = 'get',
+    );
     setState(() => _resultOfGetRequest = markets.toString());
   }
 
