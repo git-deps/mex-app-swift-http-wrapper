@@ -39,7 +39,7 @@ public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
         
         var httpMethod : HTTPMethod = .get
         
-        switch request.method {
+        switch request.method.lowercased() {
         case "get":
             httpMethod = .get
         case "post":
@@ -48,8 +48,11 @@ public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
             httpMethod = .delete
         case "patch":
             httpMethod = .patch
+        case "put":
+            httpMethod = .put
         default:
-            httpMethod = .get
+            result(argumentNotSupportedError("method", request.method))
+            return
         }
         
         Alamofire.request(
