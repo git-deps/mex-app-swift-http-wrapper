@@ -59,7 +59,8 @@ public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
             request.apiHost + "/" + request.endpoint,
             method: httpMethod,
             parameters: request.params,
-            headers: request.headers
+            headers: request.headers,
+            encoding: httpMethod == .get ? URLEncoding.default : JSONEncoding.default
         ).responseJSON{(response) in
             print("Actual server return data - " + String(decoding: response.data!, as: UTF8.self))
             
