@@ -70,7 +70,7 @@ public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
                     // return to Flutter exact the same data we received from API
                     if let requestResult = response.result.value {
                         print(requestResult)
-                        result(requestResult)
+                        result(String(decoding: response.data!, as: UTF8.self))
                     }
                 default:
                     // return to Flutter error status code and data, maybe
