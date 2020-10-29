@@ -20,7 +20,7 @@ class MexAppSwiftHttpWrapper {
 
     if (response is Map &&
         response['swiftHttpError'] != null) {
-      return SwiftHttpError.fromJson(response);
+      return SwiftHttpError.fromJson(response['swiftHttpError']);
     }
 
     return response;
