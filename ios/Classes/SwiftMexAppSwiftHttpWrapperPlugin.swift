@@ -61,20 +61,18 @@ public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
             parameters: request.params,
             encoding: httpMethod == .get ? URLEncoding.default : JSONEncoding.default,
             headers: request.headers
-        ).responseJSON{(response) in
-            print("Actual server return data - " + String(decoding: response.data!, as: UTF8.self))
+        ).response { response in
+            let responseDataAsString : String = String(decoding: response.data!, as: UTF8.self)
+            print("response - " + responseDataAsString)
             
             if let status = response.response?.statusCode {
                 switch(status) {
                 case 200:
-                    // return to Flutter exact the same data we received from API
-                    if let requestResult = response.result.value {
-                        print(requestResult)
-                        result(String(decoding: response.data!, as: UTF8.self))
-                    }
+                    // return to Flutter response data as string
+                    result(responseDataAsString)
                 default:
-                    // return to Flutter error status code and data, maybe
-                    result(self.networkError(status, response.result.value))
+                    // return to Flutter error status code and data
+                    result(self.networkError(status, responseDataAsString))
                     return
                 }
             }
@@ -89,7 +87,7 @@ public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
         return SwiftHttpError(invalidArgumentMessage: "'\(parameterName)' argument can not take value of '\(parameterValue)'").toDictionary()
     }
     
-    func networkError(_ statusCode: Int, _ data: Any?) -> [String: Any?] {
+    func networkError(_ statusCode: Int, _ data: String?) -> [String: Any?] {
         return SwiftHttpError(
             networkErrorCode: statusCode,
             networkErrorData: data
@@ -125,12 +123,12 @@ struct NetworkRequest {
 
 struct SwiftHttpError {
     var networkErrorCode: Int?
-    var networkErrorData: Any?
+    var networkErrorData: String?
     var invalidArgumentMessage: String?
     var unknownErrorMessage: String?
     
     init (networkErrorCode: Int? = nil,
-          networkErrorData: Any? = nil,
+          networkErrorData: String? = nil,
           invalidArgumentMessage: String? = nil,
           unknownErrorMessage: String? = nil) {
         self.networkErrorCode = networkErrorCode
