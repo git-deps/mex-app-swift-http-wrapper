@@ -52,7 +52,7 @@ class NetworkRequest {
 
 class SwiftHttpError {
   int networkErrorCode;
-  dynamic networkErrorData;
+  String networkErrorData;
   String invalidArgumentMessage;
   String unknownErrorMessage;
 
