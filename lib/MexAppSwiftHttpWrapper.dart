@@ -18,7 +18,7 @@ class MexAppSwiftHttpWrapper {
       jsonEncode(request),
     );
 
-    if (response is Map<String, dynamic> &&
+    if (response is Map &&
         response['swiftHttpError'] != null) {
       return SwiftHttpError.fromJson(response);
     }
@@ -58,7 +58,7 @@ class SwiftHttpError {
 
   SwiftHttpError();
 
-  factory SwiftHttpError.fromJson(Map<String, dynamic> json) => SwiftHttpError()
+  factory SwiftHttpError.fromJson(Map json) => SwiftHttpError()
     ..networkErrorCode = json['networkErrorCode'] as int
     ..networkErrorData = json['networkErrorData']
     ..invalidArgumentMessage = json['invalidArgumentMessage'] as String
