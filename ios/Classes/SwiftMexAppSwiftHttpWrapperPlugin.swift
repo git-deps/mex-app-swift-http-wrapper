@@ -4,6 +4,16 @@ import Alamofire
 
 public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
     
+    var sessionManager : SessionManager = SessionManager()
+    let defaultTimeout : Double = 2.0
+    let defaultRetryCount : Int = 3
+    var retryCount : Int?
+
+    public override init() {
+        super.init()
+        self.initSessionManager(defaultTimeout)
+    }
+    
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "MexAppSwiftHttpWrapper", binaryMessenger: registrar.messenger())
         let instance = SwiftMexAppSwiftHttpWrapperPlugin()
@@ -28,6 +38,22 @@ public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
                 return
             }
             return
+        case "setTimeout":
+            guard let timeout : Double = call.arguments as? Double else {
+                result(argumentMissingError("timeout"))
+                return
+            }
+            initSessionManager(timeout)
+            result(true)
+            return
+        case "setRetryCount":
+            guard let retryCount : Int = call.arguments as? Int else {
+                result(argumentMissingError("retryCount"))
+                return
+            }
+            self.retryCount = retryCount
+            result(true)
+            return
         default:
             result(argumentNotSupportedError("method", call.method))
             return
@@ -35,8 +61,15 @@ public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
         
     }
     
+    func initSessionManager(_ timeout: Double) {
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = timeout
+        sessionManager = SessionManager(configuration: configuration)
+    }
+    
     func handleRequest(_ request: NetworkRequest, _ result: @escaping FlutterResult) {
         
+        print(request.endpoint)
         var httpMethod : HTTPMethod = .get
         
         switch request.method.lowercased() {
@@ -55,7 +88,11 @@ public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
             return
         }
         
-        Alamofire.request(
+        sessionManager.retrier = RetryHandler(retryCount ?? defaultRetryCount) {
+            result(self.timeoutError())
+        }
+        
+        sessionManager.request(
             request.apiHost + "/" + request.endpoint,
             method: httpMethod,
             parameters: request.params,
@@ -63,7 +100,9 @@ public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
             headers: request.headers
         ).response { response in
             let responseDataAsString : String = String(decoding: response.data!, as: UTF8.self)
-            print("response - " + responseDataAsString)
+            //print(response)
+            print("response data as string - " + responseDataAsString)
+            //print(response.response?.statusCode)
             
             if let status = response.response?.statusCode {
                 switch(status) {
@@ -94,8 +133,43 @@ public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
         ).toDictionary()
     }
     
+    func timeoutError() -> [String: Any?] {
+        return SwiftHttpError(timeout: true).toDictionary()
+    }
+    
     func unknownError(_ error: Error) -> [String: Any?] {
         return SwiftHttpError(unknownErrorMessage: error.localizedDescription).toDictionary()
+    }
+}
+
+class RetryHandler: RequestRetrier {
+    
+    let retryCount: Int
+    let onTimeout: () -> ()
+    
+    init(_ retryCount: Int, _ onTimeout: @escaping () -> ()) {
+        self.retryCount = retryCount
+        self.onTimeout = onTimeout
+    }
+    
+    public func should(_ manager: SessionManager, retry request: Request, with error: Error, completion: RequestRetryCompletion) {
+        print("should")
+        
+        if let code = (error as? URLError)?.code {
+            switch code {
+            case .timedOut:
+                print("timeoutException")
+                if (request.retryCount <= retryCount) {
+                    completion(true, 0.0)
+                } else {
+                    onTimeout()
+                }
+                return
+            default:
+                completion(false, 0.0)
+                return
+            }
+        }
     }
 }
 
@@ -107,7 +181,7 @@ struct NetworkRequest {
     var params: [String: Any]?
     
     init (_ json: String) throws {
-                        
+        
         // make sure this JSON is in the format we expect
         guard let json = try JSONSerialization.jsonObject(with: Data(json.utf8), options: []) as? [String: Any] else {
             throw NSError()
@@ -126,15 +200,18 @@ struct SwiftHttpError {
     var networkErrorData: String?
     var invalidArgumentMessage: String?
     var unknownErrorMessage: String?
+    var timeout: Bool
     
     init (networkErrorCode: Int? = nil,
           networkErrorData: String? = nil,
           invalidArgumentMessage: String? = nil,
-          unknownErrorMessage: String? = nil) {
+          unknownErrorMessage: String? = nil,
+          timeout: Bool = false) {
         self.networkErrorCode = networkErrorCode
         self.networkErrorData = networkErrorData
         self.invalidArgumentMessage = invalidArgumentMessage
         self.unknownErrorMessage = unknownErrorMessage
+        self.timeout = timeout
     }
     
     func toDictionary() -> [String: Any?] {
@@ -144,6 +221,7 @@ struct SwiftHttpError {
                 "networkErrorData": networkErrorData as Any,
                 "invalidArgumentMessage": invalidArgumentMessage as Any,
                 "unknownErrorMessage": unknownErrorMessage as Any,
+                "timeout": timeout as Any,
             ],
         ]
     }
