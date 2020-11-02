@@ -15,7 +15,7 @@ public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
     }
     
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(name: "MexAppSwiftHttpWrapper", binaryMessenger: registrar.messenger())
+        let channel = FlutterMethodChannel(name: "SwiftHttpWrapper", binaryMessenger: registrar.messenger())
         let instance = SwiftMexAppSwiftHttpWrapperPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
