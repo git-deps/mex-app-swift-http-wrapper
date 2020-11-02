@@ -14,8 +14,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-  String _resultOfGetRequest = '-';
+  String _response;
+  SwiftHttpError _error;
 
   @override
   void initState() {
@@ -45,13 +45,18 @@ class _MyAppState extends State<MyApp> {
   }
 
   _getMarkets() async {
-    final markets = await MexAppSwiftHttpWrapper.request(
-      NetworkRequest()
-        ..apiHost = 'https://api.int.duedex.com'
-        ..endpoint = 'v1/instrument/BTCUSD'
-        ..method = 'get',
-    );
-    setState(() => _resultOfGetRequest = markets.toString());
+    await MexAppSwiftHttpWrapper.setTimeout(2.0);
+    await MexAppSwiftHttpWrapper.setRetryCount(2);
+    final response = await MexAppSwiftHttpWrapper.request(NetworkRequest()
+      ..apiHost = 'https://app-api-int.duedex.com'
+      ..endpoint = '/v1/instrument'
+      ..method = 'get');
+
+    if (response is SwiftHttpError) {
+      setState(() => _error = response);
+    } else {
+      setState(() => _response = response);
+    }
   }
 
   @override
@@ -67,7 +72,15 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             children: [
               _text('Result of get request:'),
-              _text(_resultOfGetRequest)
+              if (_response == null && _error == null)
+                Padding(
+                  padding: EdgeInsets.all(40.0),
+                  child: CircularProgressIndicator(),
+                ),
+              if (_response != null)
+                _text('Success response: ' + _response) ,
+              if (_error != null)
+                _text('Error: ' + _error.toJson().toString())
             ],
           ),
         ),
