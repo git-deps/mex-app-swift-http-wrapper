@@ -100,21 +100,29 @@ public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
             headers: request.headers
         ).response { response in
             let responseDataAsString : String = String(decoding: response.data!, as: UTF8.self)
-            //print(response)
             print("response data as string - " + responseDataAsString)
-            //print(response.response?.statusCode)
             
             if let status = response.response?.statusCode {
                 switch(status) {
                 case 200:
                     // return to Flutter response data as string
                     result(responseDataAsString)
+                    return
                 default:
                     // return to Flutter error status code and data
                     result(self.networkError(status, responseDataAsString))
                     return
                 }
             }
+            
+            if let error = response.error as? URLError {
+                result(self.unknownError(error))
+                return
+            }
+            
+            // for now we have no status code and have no response error - some strange error happens
+            result(SwiftHttpError(unknownErrorMessage: "Unknown error happens"))
+            return
         }
     }
     
@@ -157,7 +165,7 @@ class RetryHandler: RequestRetrier {
         
         if let code = (error as? URLError)?.code {
             switch code {
-            case .timedOut:
+            case .timedOut, .networkConnectionLost, .notConnectedToInternet:
                 print("\(Date()) - timeoutException - request retry count = \(request.retryCount)")
                 if (request.retryCount >= retryCount) {
                     onTimeout()
