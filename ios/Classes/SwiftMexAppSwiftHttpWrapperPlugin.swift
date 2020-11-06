@@ -5,7 +5,7 @@ import Alamofire
 public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
     
     var sessionManager : SessionManager = SessionManager()
-    let defaultTimeout : Double = 5.0
+    let defaultTimeout : Double = 8.0
     let defaultRetryCount : Int = 0
     var retryCount : Int?
 
