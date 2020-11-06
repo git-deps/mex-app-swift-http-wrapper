@@ -1,9 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:MexAppSwiftHttpWrapper/MexAppSwiftHttpWrapper.dart';
 
 void main() {
-  const MethodChannel channel = MethodChannel('MexAppSwiftHttpWrapper');
+  const MethodChannel channel = MethodChannel('SwiftHttpWrapper');
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -15,9 +14,5 @@ void main() {
 
   tearDown(() {
     channel.setMockMethodCallHandler(null);
-  });
-
-  test('getPlatformVersion', () async {
-    expect(await MexAppSwiftHttpWrapper.platformVersion, '42');
   });
 }
