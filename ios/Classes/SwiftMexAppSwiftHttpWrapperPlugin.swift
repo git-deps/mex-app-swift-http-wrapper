@@ -5,8 +5,8 @@ import Alamofire
 public class SwiftMexAppSwiftHttpWrapperPlugin: NSObject, FlutterPlugin {
     
     var sessionManager : SessionManager = SessionManager()
-    let defaultTimeout : Double = 2.0
-    let defaultRetryCount : Int = 3
+    let defaultTimeout : Double = 5.0
+    let defaultRetryCount : Int = 0
     var retryCount : Int?
 
     public override init() {
@@ -158,11 +158,11 @@ class RetryHandler: RequestRetrier {
         if let code = (error as? URLError)?.code {
             switch code {
             case .timedOut:
-                print("timeoutException")
-                if (request.retryCount <= retryCount) {
-                    completion(true, 0.0)
-                } else {
+                print("\(Date()) - timeoutException - request retry count = \(request.retryCount)")
+                if (request.retryCount >= retryCount) {
                     onTimeout()
+                } else {
+                    completion(true, 0.0)
                 }
                 return
             default:
