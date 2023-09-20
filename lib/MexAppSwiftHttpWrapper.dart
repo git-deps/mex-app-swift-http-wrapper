@@ -37,36 +37,45 @@ class MexAppSwiftHttpWrapper {
 class NetworkRequest {
   /// Host, for example "https://main3-cn.duedex.com:12343"
   /// Include protocol and port
-  String apiHost;
+  final String apiHost;
 
   /// Endpoint path, for example "v1/user"
   /// Can be without "/" at start
-  String endpoint;
+  final String endpoint;
 
   /// Http method. Allowed get/, post, delete, patch, put \
   /// Returns an error if use not supported method
-  String method;
+  final String method;
 
   /// Headers as a map
-  Map<String, String> headers;
+  final Map<String, String>? headers;
 
   /// Params as a map
-  Map<String, dynamic> params;
+  final Map<String, dynamic>? params;
 
-  NetworkRequest fromJson(Map<String, dynamic> json) => NetworkRequest()
-    ..apiHost = json['apiHost'] as String
-    ..endpoint = json['endpoint'] as String
-    ..method = json['method'] as String
-    ..headers = json['headers'] as Map<String, String>
-    ..params = json['params'] as Map<String, dynamic>;
+  const NetworkRequest({
+    required this.apiHost,
+    required this.endpoint,
+    required this.method,
+    this.headers,
+    this.params,
+  });
+
+    NetworkRequest fromJson(Map<String, dynamic> json) => NetworkRequest(
+      apiHost: json['apiHost'] as String,
+      endpoint: json['endpoint'] as String,
+      method: json['method'] as String,
+      headers: json['headers'] as Map<String, String>,
+      params: json['params'] as Map<String, dynamic>,
+    );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'apiHost': apiHost,
-        'endpoint': endpoint,
-        'method': method,
-        'headers': headers,
-        'params': params,
-      };
+    'apiHost': apiHost,
+    'endpoint': endpoint,
+    'method': method,
+    'headers': headers,
+    'params': params,
+  };
 }
 
 /// Error object which SwiftHttpWrapper returns in case of any error
@@ -78,7 +87,7 @@ class SwiftHttpError {
   int networkErrorCode;
 
   /// If the server returns us an error and some data, we put data here
-  String networkErrorData;
+  String? networkErrorData;
 
   /// Some argument is wrong. We did NOT perform the network requests yet.
   /// Just returns an error because some argument was wrong
@@ -94,7 +103,13 @@ class SwiftHttpError {
   /// and if fails - return timeout error
   bool timeout;
 
-  SwiftHttpError();
+  SwiftHttpError({
+    this.networkErrorCode = 0,
+    this.networkErrorData,
+    this.invalidArgumentMessage = '',
+    this.unknownErrorMessage = '',
+    this.timeout = false,
+  });
 
   factory SwiftHttpError.fromJson(Map json) => SwiftHttpError()
     ..networkErrorCode = json['networkErrorCode'] as int
