@@ -87,14 +87,14 @@ class SwiftHttpError {
   int networkErrorCode;
 
   /// If the server returns us an error and some data, we put data here
-  String? networkErrorData;
+  String networkErrorData;
 
   /// Some argument is wrong. We did NOT perform the network requests yet.
   /// Just returns an error because some argument was wrong
-  String invalidArgumentMessage;
+  String? invalidArgumentMessage;
 
   /// Some unknown error happens in any place
-  String unknownErrorMessage;
+  String? unknownErrorMessage;
 
   /// We faced timeout exception for some reason
   /// Implementation have default values: timeout = 2 seconds, retry count = 3
@@ -105,9 +105,9 @@ class SwiftHttpError {
 
   SwiftHttpError({
     this.networkErrorCode = 0,
-    this.networkErrorData,
-    this.invalidArgumentMessage = '',
-    this.unknownErrorMessage = '',
+    this.networkErrorData = '',
+    this.invalidArgumentMessage,
+    this.unknownErrorMessage,
     this.timeout = false,
   });
 
